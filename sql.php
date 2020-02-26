@@ -1,16 +1,18 @@
-<?php 
+<?php
+
 
 class SQL{
 
     //Backing Fields
+    protected $ret_array; //The array for retrieving only a certain number of items.
     protected $db; //The actual database variable being wrapped.
     protected $statement; //For making statements.
     public $status; //The status of the connection.
 
     //Constructor that will call the connect method.
-    public function __construct($host, $dbname, $user, $pass)
+    public function __construct(array $data)
     {
-        $this->status = $this->connect($host, $dbname, $user, $pass);
+        $this->status = $this->connect($data['host'], $data['dbname'], $data['user'], $data['pass']);
         
     }
 
@@ -37,9 +39,24 @@ class SQL{
 
     //Retrieving database info and returning it as a class.  Must always be returned to a
     //class.
-    public function retrieve($sql, $class = ""){
+    public function retrieve_all($sql, $class = ""){
         $this->direct_edit($sql);
         return $this->statement->fetchAll(PDO::FETCH_CLASS, $class);
+    }
+    
+    //For retrieving a specified number of items.
+    public function retrieve($sql, $class = "", $count){
+        $this->ret_array[$count];
+        $this->direct_edit($sql);
+
+        $i = 0; //Iteration variable
+        while($row = $this->statement->fetch(PDO::FETCH_CLASS, $class)
+        || $i < $count){ //Until the list of items ends or count is reached.
+            $this->ret_array[$i] = $row; //Stores the rows in an array.
+            $i++; //Plus
+        }
+
+        return $this->ret_array; //Returns the array.
     }
 
 
